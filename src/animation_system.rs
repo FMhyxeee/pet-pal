@@ -2,13 +2,13 @@ use std::path::Path;
 
 use regex::Regex;
 
-struct AnimationSystem {
+#[derive(Debug)]
+pub struct AnimationSystem {
     pub name: String,
     pub animations: Vec<Animation>,
     pub length: u32,
     pub current_animation: u32,
 }
-
 
 impl AnimationSystem {
     pub fn load_from(path: impl Into<String>) -> AnimationSystem {
@@ -31,8 +31,8 @@ impl AnimationSystem {
             }
             let file_name = path.file_name().unwrap().to_str().unwrap();
             let file_path = path.parent().unwrap().to_str().unwrap();
-            println!("file_path: {}", file_path);
-            println!("file_name: {}", file_name);
+            println!("file_path: {file_path}");
+            println!("file_name: {file_name}");
             let animation = Animation {
                 file_name: file_name.to_string(),
                 file_path: file_path.to_string(),
@@ -43,19 +43,28 @@ impl AnimationSystem {
         animations.sort_by(|a, b| {
             // use regex to get the number from the file name
             let re = Regex::new(r"\d+").unwrap();
-            let a = re.find(&a.file_name).unwrap().as_str().parse::<u32>().unwrap();
-            let b = re.find(&b.file_name).unwrap().as_str().parse::<u32>().unwrap();
+            let a = re
+                .find(&a.file_name)
+                .unwrap()
+                .as_str()
+                .parse::<u32>()
+                .unwrap();
+            let b = re
+                .find(&b.file_name)
+                .unwrap()
+                .as_str()
+                .parse::<u32>()
+                .unwrap();
             a.cmp(&b)
         });
 
         AnimationSystem {
             name: name.to_string(),
             animations,
-            length: length,
+            length,
             current_animation: 0,
         }
     }
-
 
     pub fn next_animation(&mut self) -> Option<&Animation> {
         if self.current_animation == self.length {
@@ -64,16 +73,15 @@ impl AnimationSystem {
         self.current_animation += 1;
         Some(&self.animations[self.current_animation as usize - 1])
     }
-        
-    
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
-struct Animation {
+#[derive(Debug)]
+pub struct Animation {
     file_name: String,
+    // this field not used yet
+    #[allow(dead_code)]
     file_path: String,
 }
-
 
 impl From<&str> for Animation {
     fn from(path: &str) -> Self {
@@ -93,7 +101,6 @@ impl From<&str> for Animation {
     }
 }
 
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -110,7 +117,7 @@ mod test {
         let animation_system = AnimationSystem::load_from("img/Stocking");
         assert_eq!(animation_system.name, "Stocking");
         assert_eq!(animation_system.length, 43);
-        assert_eq!(animation_system.current_animation, 1);
+        assert_eq!(animation_system.current_animation, 0);
         assert_eq!(animation_system.animations[0].file_name, "shime1.png");
         assert_eq!(animation_system.animations[1].file_name, "shime2.png");
         assert_eq!(animation_system.animations[2].file_name, "shime3.png");
@@ -128,6 +135,5 @@ mod test {
         assert_eq!(animation_system.current_animation, 2);
         let animation = animation_system.next_animation().unwrap();
         assert_eq!(animation.file_name, "shime3.png");
-        
     }
 }
