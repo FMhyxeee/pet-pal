@@ -47,6 +47,8 @@ impl eframe::App for MyApp {
             self.current_time = now;
             self.num += 1;
         }
+
+        egui::Context::request_repaint(ctx);
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.label(format!("frame per second: {}", self.num));
             self.imgs[self.num % self.imgs.len()].show(ui);
